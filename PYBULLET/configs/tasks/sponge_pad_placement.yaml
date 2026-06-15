@@ -1,0 +1,5 @@
+name: sponge_pad_placement
+placeholder: true
+object_class: 3D volumetric deformable
+physical_challenge: Volumetric compression and elastic recoil
+description: Place a compressible sponge pad while managing recoil and shape recovery.

@@ -1,0 +1,15 @@
+# Shared environment defaults for the scaffold.
+gui: false
+time_step: 0.0041666667
+gravity:
+  x: 0
+  y: 0
+  z: -9.81
+solver_iterations: 150
+workspace_bounds:
+  x_min: 0.2
+  x_max: 0.8
+  y_min: -0.4
+  y_max: 0.4
+  z_min: 0.0
+  z_max: 0.5

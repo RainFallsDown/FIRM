@@ -1,0 +1,5 @@
+name: tape_manipulation
+placeholder: true
+object_class: 1D closed-loop flexible object
+physical_challenge: Closed-loop geometry, rolling, and slipping
+description: Manipulate a closed-loop tape object under rolling and slipping constraints.

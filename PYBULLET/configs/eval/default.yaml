@@ -1,0 +1,10 @@
+# Shared evaluation defaults for the scaffold.
+episodes: 1
+seed: 0
+policy: no_op
+output_dir: outputs/eval
+metrics:
+  binary_success: true
+  completion_quality: true
+  deformation_quality: true
+  robustness: true

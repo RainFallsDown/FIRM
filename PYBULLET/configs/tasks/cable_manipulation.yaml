@@ -1,0 +1,5 @@
+name: cable_manipulation
+placeholder: true
+object_class: 1D bending object
+physical_challenge: Bending stiffness and center-of-mass shift
+description: Manipulate and place a cable under industrial mixed-stiffness constraints.
