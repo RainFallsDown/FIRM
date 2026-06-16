@@ -1,5 +1,0 @@
-name: box_folding
-placeholder: true
-object_class: Articulated semi-rigid structure
-physical_challenge: Articulated structure and hinge-like constraints
-description: Fold articulated cardboard components into a target box configuration.

@@ -1,5 +1,0 @@
-name: instruction_manual_insertion
-placeholder: true
-object_class: 2D planar sheet
-physical_challenge: Planar sheet deformation and confined insertion
-description: Insert a planar instruction manual into a confined packaging structure.

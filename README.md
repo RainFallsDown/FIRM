@@ -47,9 +47,6 @@ scripts/
   render_scene_snapshot.py
 docs/
   scene_parameters.md
-  genesis_advanced_ik_notes.md
-  genesis_firm_sim_plan.md
-PYBULLET/                   # archived legacy baseline, not the active path
 ```
 
 ## Quickstart
@@ -118,24 +115,12 @@ At runtime, the code automatically extracts it into:
 
 This extracted folder is intentionally ignored in Git because it is runtime-generated.
 
-## Notes on Paper Assets
-
-The local paper copies in this workspace are for internal reference while building scenes.
-
-- Do **not** publicly upload confidential or reviewer-copy manuscript PDFs.
-- In particular, derived files such as translated or dual-language PDFs are ignored by default.
-
 ## Active Conventions
 
 - **Genesis World** is the only active simulation path.
-- `PYBULLET/` is retained only as an archived legacy baseline.
 - New scenes, assets, and runtime scripts should stay on the Genesis path.
 
-## Uploading to GitHub
+## Notes
 
-This workspace is prepared to be uploaded into:
-
-- upstream repo: `https://github.com/RainFallsDown/FIRM`
-- contributor account used for push/PR: `ChinChilla-HTL`
-
-See [docs/GITHUB_UPLOAD.md](docs/GITHUB_UPLOAD.md) for the exact direct-push and fork-plus-PR flows.
+- `docs/scene_parameters.md` records the confirmed scene dimensions used in the current setup.
+- Runtime-generated assets under `assets/tianqing_urdf/` are ignored and will be recreated automatically from `tianqing_urdf.zip`.

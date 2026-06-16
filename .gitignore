@@ -12,9 +12,11 @@ htmlcov/
 
 outputs/
 *.mp4
+588_FIRM_A_Benchmark_for_Indus.pdf
 588_FIRM_A_Benchmark_for_Indus-dual.pdf
 588_FIRM_A_Benchmark_for_Indus-mono.pdf
 
+PYBULLET/
 assets/tianqing_urdf/
 firm_sim/scenes/generated_assets/
 
