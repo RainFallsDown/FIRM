@@ -1,0 +1,12 @@
+<mujoco model="instruction_manual_bifold">
+  <compiler angle="radian"/>
+  <worldbody>
+    <body name="manual_root">
+      <geom name="left_page" type="box" pos="-0.040000 0 0" size="0.040000 0.055000 0.001250"/>
+      <body name="right_page" pos="0 0 0">
+        <joint name="manual_hinge" type="hinge" axis="0 1 0" limited="true" range="-2.6 2.6"/>
+        <geom name="right_page" type="box" pos="0.040000 0 0" size="0.040000 0.055000 0.001250"/>
+      </body>
+    </body>
+  </worldbody>
+</mujoco>
