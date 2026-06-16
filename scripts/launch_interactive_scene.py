@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Launch the first-layer Genesis FIRM workspace interactively."""
+"""Launch a Genesis FIRM scene interactively."""
 
 from __future__ import annotations
 

@@ -43,7 +43,7 @@ firm_sim/
     registry.py             # task registry and scene metadata
 scripts/
   list_task_scenes.py       # list available scenes
-  launch_layer1_interactive.py
+  launch_interactive_scene.py
   render_scene_snapshot.py
 docs/
   scene_parameters.md
@@ -84,11 +84,11 @@ python scripts/list_task_scenes.py
 Start an interactive viewer:
 
 ```bash
-python scripts/launch_layer1_interactive.py --scene instruction_manual
-python scripts/launch_layer1_interactive.py --scene sponge_pad
-python scripts/launch_layer1_interactive.py --scene tape_manipulation
-python scripts/launch_layer1_interactive.py --scene cable_manipulation
-python scripts/launch_layer1_interactive.py --scene box_folding
+python scripts/launch_interactive_scene.py --scene instruction_manual
+python scripts/launch_interactive_scene.py --scene sponge_pad
+python scripts/launch_interactive_scene.py --scene tape_manipulation
+python scripts/launch_interactive_scene.py --scene cable_manipulation
+python scripts/launch_interactive_scene.py --scene box_folding
 ```
 
 Render an offscreen snapshot:
