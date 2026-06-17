@@ -1,0 +1,7 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+outputs/
+*.mp4
+assets/tianqing_urdf/
+!firm_sim/scenes/generated_assets/*.xml
