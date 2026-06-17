@@ -1,0 +1,41 @@
+{
+  "tasks": {
+    "Manual": {
+      "target_insertion_depth": 1.0,
+      "max_alignment_error": 0.05,
+      "w_inside": 0.95,
+      "w_align": 0.05,
+      "min_object_in_target_ratio": 0.98,
+      "dq_fold_warning_compactness": 0.08,
+      "dq_w_fold": 0.7,
+      "dq_w_contact": 0.3
+    },
+    "Cable": {
+      "min_contained_length": 0.98,
+      "dq_tangling_warning": 0.90,
+      "dq_w_tangling": 0.4,
+      "dq_w_contact": 0.6
+    },
+    "Box": {
+      "target_fold_angle": 90.0,
+      "max_angle_error": 15.0,
+      "w_inside": 0.95,
+      "w_angle": 0.05,
+      "min_object_in_target_ratio": 0.96,
+      "dq_deform_warning_compactness": 0.08,
+      "dq_w_deform": 0.7,
+      "dq_w_contact": 0.3
+    },
+    "Sponge": {
+      "max_pose_error": 0.05,
+      "max_residual_compression": 0.15,
+      "max_rebound_shift": 0.05,
+      "w_inside": 0.7,
+      "w_pose": 0.3,
+      "min_object_in_target_ratio": 0.60
+    },
+    "Tape": {
+      "min_object_in_target_ratio": 0.60
+    }
+  }
+}

@@ -1,0 +1,38 @@
+# Python/runtime artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Local environments and caches
+.venv/
+venv/
+env/
+.env
+.cache/
+
+# Large/generated benchmark workspaces
+annotation_workspace*/
+results*/
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.parquet
+*.npy
+*.npz
+
+# Local model checkpoints and datasets
+sam2/
+sam3/
+checkpoints/
+data/
+datasets/
+
+# OS/editor artifacts
+.DS_Store
+*.swp
+*.swo
+
