@@ -78,7 +78,28 @@ python examples/rtc/eval_with_real_robot.py \
   --task="Pick and place the target object" \
   --duration=120
 ```
+## FIRM Benchmark 与仿真资源
 
+除 ACT / Pi05 真机训练与部署流程外，本仓库还包含与 FIRM 相关的 benchmark 评测工具和仿真视频资源。这些模块与真机部署代码相互独立，可用于工业柔性物体操作任务的评测、可视化和仿真分析。
+
+### FIRM Benchmark 评测工具
+
+`FIRM-benchmark/` 目录包含 FIRM benchmark 的评测工具。FIRM 面向工业场景中的柔性物体与刚柔性交互操作任务，例如说明书、电缆、海绵垫、胶带卷和纸箱等对象在产线约束下的抓取、插入、放置、折叠和整理任务。
+
+该模块支持 DAP 风格的评测流程，主要包括：
+
+- 目标物体 mask 生成与 mask-based 指标提取；
+- 面向不同任务的 episode scoring；
+- 成功率、完成质量和形变感知质量统计；
+- 柔性物体操作失败模式诊断；
+- 紧凑 benchmark 结果报告生成。
+
+该模块的核心目标是让机器人操作评测不只停留在二值成功率，而是进一步分析任务部分完成情况、形变质量、扰动鲁棒性以及物理失败模式，例如折叠、滑移、滚动、卡滞、残余压缩和回弹位移等问题。
+
+主目录为：
+
+```text
+FIRM-benchmark/
 ## 说明
 
 - 文档中的路径、IP、端口和 topic 仅为示例。
