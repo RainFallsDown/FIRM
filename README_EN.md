@@ -78,7 +78,28 @@ python examples/rtc/eval_with_real_robot.py \
   --task="Pick and place the target object" \
   --duration=120
 ```
+## FIRM Benchmark and Simulation Assets
 
+In addition to the ACT / Pi05 real-robot training and deployment pipeline, this repository also includes FIRM-related benchmark and simulation utilities. These components are provided as independent modules and can be used for evaluation, visualization, and simulation-based analysis of industrial flexible-object robot manipulation.
+
+### FIRM Benchmark Evaluation Utilities
+
+The `FIRM-benchmark/` directory contains the evaluation utilities for the FIRM benchmark. FIRM focuses on industrial flexible-object and mixed-stiffness manipulation tasks, such as manipulating manuals, cables, sponge pads, tape rolls, and cardboard boxes under production-line constraints.
+
+The benchmark utilities support a DAP-style evaluation pipeline, including:
+
+- object mask generation and mask-based metric extraction;
+- task-specific episode scoring;
+- success rate, completion quality, and deformation-aware quality aggregation;
+- failure-mode diagnosis for flexible-object manipulation;
+- compact benchmark result reporting.
+
+The core purpose of this module is to evaluate robot policies beyond binary success. Instead of only checking whether a task succeeds or fails, the benchmark also analyzes partial completion, deformation quality, perturbation robustness, and physical failure modes such as folding, slipping, rolling, jamming, residual compression, and rebound-induced displacement.
+
+The main directory is:
+
+```text
+FIRM-benchmark/
 ## Notes
 
 - Paths, IPs, ports, and ROS2 topics in this document are examples only.
