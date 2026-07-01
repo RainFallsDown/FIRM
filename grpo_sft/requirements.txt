@@ -1,0 +1,10 @@
+# Default install path for ACT/Pi0.5.
+# The full project uses three separate environments because DreamZero,
+# LingBot-VA, and ACT/Pi0.5 require incompatible PyTorch versions.
+#
+# Use one of:
+#   pip install -r requirements/dreamzero.txt
+#   pip install -r requirements/lingbot-va.txt
+#   pip install -r requirements/act-pi05.txt
+
+-r requirements/act-pi05.txt

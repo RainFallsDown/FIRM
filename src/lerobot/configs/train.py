@@ -74,6 +74,16 @@ class TrainPipelineConfig(HubMixin):
     rabc_epsilon: float = 1e-6  # Small constant for numerical stability
     rabc_head_mode: str | None = "sparse"  # For dual-head models: "sparse" or "dense"
 
+    # ACT-GRPO batch intrinsic reward-weighted BC parameters
+    use_grpo: bool = False
+    grpo_beta: float = 1.0
+    grpo_min_weight: float = 0.5
+    grpo_max_weight: float = 2.0
+    grpo_bc_reward_weight: float = 0.45
+    grpo_smooth_reward_weight: float = 0.25
+    grpo_accel_reward_weight: float = 0.20
+    grpo_gripper_reward_weight: float = 0.10
+
     # Rename map for the observation to override the image and state keys
     rename_map: dict[str, str] = field(default_factory=dict)
     checkpoint_path: Path | None = field(init=False, default=None)
@@ -134,6 +144,15 @@ class TrainPipelineConfig(HubMixin):
         elif self.use_policy_training_preset and not self.resume:
             self.optimizer = self.policy.get_optimizer_preset()
             self.scheduler = self.policy.get_scheduler_preset()
+
+        if self.use_grpo and self.use_rabc:
+            raise ValueError("use_grpo and use_rabc cannot both be true.")
+        if self.grpo_min_weight <= 0:
+            raise ValueError("grpo_min_weight must be positive.")
+        if self.grpo_max_weight < self.grpo_min_weight:
+            raise ValueError("grpo_max_weight must be >= grpo_min_weight.")
+        if self.grpo_beta < 0:
+            raise ValueError("grpo_beta must be non-negative.")
 
         if self.policy.push_to_hub and not self.policy.repo_id:
             raise ValueError(

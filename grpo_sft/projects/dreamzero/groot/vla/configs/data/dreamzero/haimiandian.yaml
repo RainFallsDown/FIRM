@@ -1,0 +1,183 @@
+# @package _global_
+
+defaults:
+- /data/dreamzero/base_48_wan_fine_aug_relative
+- _self_
+image_resolution_width: 640
+image_resolution_height: 480
+image_resolution_width_single_frame: 640
+image_resolution_height_single_frame: 480
+max_state_dim: 64
+use_global_metadata: false
+max_steps: 100
+relative_action: false
+relative_action_per_horizon: false
+relative_action_keys:
+- left_arm
+- right_arm
+- gripper
+max_chunk_size: 5
+dataset_shard_sampling_rate: 0.1
+mixture_dataset_cls: groot.vla.data.dataset.lerobot_sharded.ShardedLeRobotMixtureDataset.from_mixture_spec
+single_dataset_cls: groot.vla.data.dataset.lerobot_sharded.ShardedLeRobotSubLangSingleActionChunkDatasetDROID
+haimiandian_data_root: /share/project/rsy/dreamzero_project/data/haimiandian_50
+train_dataset:
+  _target_: ${mixture_dataset_cls}
+  _convert_: object
+  mixture_spec:
+  - dataset_path:
+      haimiandian:
+      - ${haimiandian_data_root}
+    dataset_weight: 1.0
+    distribute_weights: true
+  dataset_class: ${single_dataset_cls}
+  all_modality_configs: ${modality_configs}
+  all_transforms: ${transforms}
+  metadata_versions: ${metadata_versions}
+  fps: ${fps}
+  dataset_kwargs:
+    video_backend: torchvision_av
+    use_global_metadata: ${use_global_metadata}
+    max_chunk_size: ${max_chunk_size}
+    relative_action: ${relative_action}
+    relative_action_keys: ${relative_action_keys}
+    relative_action_per_horizon: ${relative_action_per_horizon}
+  mixture_kwargs:
+    training: true
+    balance_dataset_weights: false
+    seed: 42
+    shard_sampling_rate: ${dataset_shard_sampling_rate}
+modality_config_haimiandian:
+  video:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices:
+    - 0
+    - 2
+    - 4
+    - 6
+    - 8
+    - 10
+    - 12
+    - 14
+    - 16
+    - 18
+    eval_delta_indices:
+    - 0
+    modality_keys:
+    - video.head
+    #- video.hand_left
+    #- video.hand_right
+  state:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices:
+    - 0
+    modality_keys:
+    - state.left_arm
+    - state.right_arm
+    - state.gripper
+  action:
+    _target_: groot.vla.data.dataset.ModalityConfig
+    delta_indices:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
+    - 21
+    - 22
+    - 23
+    - 24
+    - 25
+    - 26
+    - 27
+    - 28
+    - 29
+    - 30
+    - 31
+    - 32
+    - 33
+    - 34
+    - 35
+    - 36
+    - 37
+    - 38
+    - 39
+    - 40
+    - 41
+    - 42
+    - 43
+    - 44
+    - 45
+    - 46
+    - 47
+    modality_keys:
+    - action.left_arm
+    - action.right_arm
+    - action.gripper
+transform_haimiandian:
+  _target_: groot.vla.data.transform.ComposedModalityTransform
+  transforms:
+  - _target_: groot.vla.data.transform.VideoToTensor
+    apply_to: ${modality_config_haimiandian.video.modality_keys}
+  - _target_: groot.vla.data.transform.VideoCrop
+    apply_to: ${modality_config_haimiandian.video.modality_keys}
+    scale: 0.95
+    mode: random
+  - _target_: groot.vla.data.transform.VideoResize
+    apply_to: ${modality_config_haimiandian.video.modality_keys}
+    height: 480
+    width: 640
+    interpolation: linear
+  - _target_: groot.vla.data.transform.VideoColorJitter
+    apply_to: ${modality_config_haimiandian.video.modality_keys}
+    brightness: 0.3
+    contrast: 0.4
+    saturation: 0.5
+    hue: 0.08
+  - _target_: groot.vla.data.transform.VideoToNumpy
+    apply_to: ${modality_config_haimiandian.video.modality_keys}
+  - _target_: groot.vla.data.transform.StateActionToTensor
+    apply_to: ${modality_config_haimiandian.state.modality_keys}
+  - _target_: groot.vla.data.transform.StateActionTransform
+    apply_to: ${modality_config_haimiandian.state.modality_keys}
+    normalization_modes:
+      state.left_arm: q99
+      state.right_arm: q99
+      state.gripper: q99
+  - _target_: groot.vla.data.transform.StateActionToTensor
+    apply_to: ${modality_config_haimiandian.action.modality_keys}
+  - _target_: groot.vla.data.transform.StateActionTransform
+    apply_to: ${modality_config_haimiandian.action.modality_keys}
+    normalization_modes:
+      action.left_arm: q99
+      action.right_arm: q99
+      action.gripper: q99
+  - _target_: groot.vla.data.transform.ConcatTransform
+    video_concat_order: ${modality_config_haimiandian.video.modality_keys}
+    state_concat_order: ${modality_config_haimiandian.state.modality_keys}
+    action_concat_order: ${modality_config_haimiandian.action.modality_keys}
+  - ${model_specific_transform}
+modality_configs:
+  haimiandian: ${modality_config_haimiandian}
+transforms:
+  haimiandian: ${transform_haimiandian}
+metadata_versions:
+  haimiandian: v3.0
+fps:
+  haimiandian: 30

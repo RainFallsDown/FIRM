@@ -1,0 +1,198 @@
+FIRM SFT/GRPO 环境需求
+=====================
+
+1. 运行平台
+-----------
+推荐环境：
+  Ubuntu 20.04 LTS 或 Ubuntu 22.04 LTS
+
+建议用途：
+  训练与评估建议在 Linux GPU 服务器上执行。
+  Windows 本地环境适合代码浏览、文档编辑和目录整理，不建议直接训练。
+
+
+2. 硬件需求
+-----------
+DreamZero：
+  推荐 4 张 NVIDIA H100 80GB。
+  训练方式为 torchrun + DeepSpeed ZeRO-3。
+
+LingBot-VA：
+  推荐 4 张 NVIDIA H100/A100 级别 GPU。
+  训练方式为 torch.distributed.run，脚本内已包含多卡启动参数。
+
+ACT：
+  可使用单张或多张 NVIDIA GPU。
+  显存需求随 batch size、图像分辨率与 policy 配置变化。
+
+Pi0.5：
+  推荐使用大显存 NVIDIA GPU。
+  Pi0.5 策略骨干大于 ACT，GRPO 训练的显存压力更高。
+
+
+3. 系统依赖
+-----------
+建议安装：
+  git
+  git-lfs
+  ffmpeg
+  cmake
+  ninja-build
+  gcc/g++
+  CUDA Toolkit 12.x
+  与 PyTorch/CUDA 版本匹配的 NVIDIA driver
+
+
+4. 通用 Python 工具
+-------------------
+建议安装：
+  conda 或 mamba
+  pip >= 23
+  huggingface-cli
+  torchrun
+  pytest
+
+可选：
+  wandb
+  deepspeed
+
+
+5. DreamZero 环境
+-----------------
+Python：
+  3.11
+
+安装方式：
+  cd firm
+  conda create -n firm-dreamzero python=3.11 -y
+  conda activate firm-dreamzero
+  pip install -r requirements/dreamzero.txt
+
+关键依赖版本：
+  torch==2.8.0
+  torchvision==0.23.0
+  torchaudio==2.8.0
+  transformers==4.51.3
+  diffusers==0.30.2
+  datasets==3.6.0
+  peft==0.5.0
+  einops==0.8.1
+  hydra-core>=1.3.2,<1.4.0
+  ray[default]==2.47.1
+  matplotlib>=3.8.0,<4.0.0
+  scipy==1.15.3
+  huggingface_hub>=0.34.2,<0.36.0
+  deepspeed
+  sentencepiece>=0.2.0,<1.0.0
+  wandb>=0.17.0,<1.0.0
+
+
+6. LingBot-VA 环境
+------------------
+Python：
+  3.10
+
+安装方式：
+  cd firm
+  conda create -n firm-lingbot python=3.10 -y
+  conda activate firm-lingbot
+  pip install -r requirements/lingbot-va.txt
+
+关键依赖版本：
+  torch==2.9.0
+  torchvision==0.24.0
+  torchaudio==2.9.0
+  diffusers==0.36.0
+  transformers>=4.55.4,<4.56.0
+  tokenizers>=0.21.4,<0.22.0
+  accelerate>=1.10.0,<2.0.0
+  einops>=0.8.0,<0.9.0
+  flash-attn>=2.5.9,<3.0.0
+  lerobot==0.3.3
+  safetensors>=0.4.3,<1.0.0
+  scipy>=1.10.1,<1.15.0
+  wandb>=0.17.0,<1.0.0
+
+
+7. ACT / Pi0.5 环境
+-------------------
+Python：
+  3.10
+
+安装方式：
+  cd firm
+  conda create -n firm-act python=3.10 -y
+  conda activate firm-act
+  pip install -r requirements/act-pi05.txt
+
+关键依赖版本：
+  datasets>=4.0.0,<4.2.0
+  diffusers>=0.27.2,<0.36.0
+  huggingface-hub[hf-transfer,cli]>=0.34.2,<0.36.0
+  accelerate>=1.10.0,<2.0.0
+  torch>=2.2.1,<2.8.0
+  torchvision>=0.21.0,<0.23.0
+  transformers>=4.57.1,<5.0.0
+  av>=15.0.0,<16.0.0
+  gymnasium>=1.1.1,<2.0.0
+  rerun-sdk>=0.24.0,<0.27.0
+  draccus==0.10.0
+  safetensors>=0.4.3,<1.0.0
+  scipy>=1.10.1,<1.15.0
+  pytest>=8.1.0,<9.0.0
+
+说明：
+  ACT / Pi0.5 训练脚本通过 PYTHONPATH 引用本地 LeRobot 源码树。
+  训练脚本会读取 projects/act-grpo-datatest/env/activate_act_grpo.sh。
+
+
+8. 根目录 requirements.txt
+------------------------
+说明：
+  根目录 requirements.txt 默认指向 ACT / Pi0.5 的轻量安装路径。
+  若需要 DreamZero 或 LingBot-VA，请直接安装对应的 requirements 子文件。
+
+
+9. 模型目录建议
+---------------
+建议模型根目录：
+  /models
+
+示例路径：
+  /models/dreamzero/Wan2.2-TI2V-5B
+  /models/dreamzero/Wan2.1-I2V-14B-480P
+  /models/dreamzero/umt5-xxl
+  /models/lingbot-va-base
+  /outputs/act_sft/checkpoints/003500/pretrained_model
+  /outputs/pi05_sft/checkpoints/003500/pretrained_model
+
+
+10. 数据目录建议
+----------------
+建议数据根目录：
+  /data
+
+示例路径：
+  /data/haimiandian_50
+  /data/tianqing_mixed
+
+数据格式：
+  ACT 与 Pi0.5 使用 LeRobot v3 格式。
+  DreamZero 使用 LeRobot 数据并额外需要 GEAR/DreamZero 元数据。
+  LingBot-VA 使用 LeRobot 数据、预计算视频 latent 和 empty_emb.pt。
+
+
+11. 快速验证
+------------
+DreamZero：
+  cd projects/dreamzero
+  python test_grpo.py
+  python test_dream_grpo_lingbot_parity.py
+
+LingBot-VA：
+  cd projects/lingbot-va
+  python -m pytest wan_va/tests/test_grpo.py
+
+ACT/Pi0.5：
+  cd projects/act-grpo-datatest/resources/lerobot
+  python -m pytest tests/utils/test_act_grpo.py tests/policies/test_act_grpo_loss.py

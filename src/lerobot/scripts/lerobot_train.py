@@ -37,6 +37,7 @@ from lerobot.policies.factory import make_policy, make_pre_post_processors
 from lerobot.policies.pretrained import PreTrainedPolicy
 from lerobot.rl.wandb_utils import WandBLogger
 from lerobot.scripts.lerobot_eval import eval_policy_all
+from lerobot.utils.act_grpo import ACTGRPOWeightConfig, ACTGRPOWeights
 from lerobot.utils.import_utils import register_third_party_plugins
 from lerobot.utils.logging_utils import AverageMeter, MetricsTracker
 from lerobot.utils.random_utils import set_seed
@@ -64,6 +65,7 @@ def update_policy(
     lr_scheduler=None,
     lock=None,
     rabc_weights_provider=None,
+    grpo_weights_provider=None,
 ) -> tuple[MetricsTracker, dict]:
     """
     Performs a single training step to update the policy's weights.
@@ -81,6 +83,7 @@ def update_policy(
         lr_scheduler: An optional learning rate scheduler.
         lock: An optional lock for thread-safe optimizer updates.
         rabc_weights_provider: Optional RABCWeights instance for sample weighting.
+        grpo_weights_provider: Optional ACTGRPOWeights instance for ACT-GRPO sample weighting.
 
     Returns:
         A tuple containing:
@@ -93,6 +96,9 @@ def update_policy(
     # Get RA-BC weights if enabled
     rabc_batch_weights = None
     rabc_batch_stats = None
+    if rabc_weights_provider is not None and grpo_weights_provider is not None:
+        raise ValueError("RABC batch weights and GRPO weights cannot be used together.")
+
     if rabc_weights_provider is not None:
         rabc_batch_weights, rabc_batch_stats = rabc_weights_provider.compute_batch_weights(batch)
 
@@ -105,12 +111,23 @@ def update_policy(
 
             # Apply RA-BC weights: L_RA-BC = Σ(w_i * l_i) / (Σw_i + ε)
             # rabc_batch_weights is already normalized to sum to batch_size
-            epsilon = 1e-6
-            loss = (per_sample_loss * rabc_batch_weights).sum() / (rabc_batch_weights.sum() + epsilon)
+            weights = rabc_batch_weights.to(
+                device=per_sample_loss.device, dtype=per_sample_loss.dtype
+            ).detach()
+            loss = (per_sample_loss * weights).sum() / weights.sum().clamp_min(1e-6)
             # Log raw mean weight (before normalization) - this is the meaningful metric
             output_dict["rabc_mean_weight"] = rabc_batch_stats["raw_mean_weight"]
             output_dict["rabc_num_zero_weight"] = rabc_batch_stats["num_zero_weight"]
             output_dict["rabc_num_full_weight"] = rabc_batch_stats["num_full_weight"]
+        elif grpo_weights_provider is not None:
+            per_sample_loss, output_dict = policy.forward(batch, reduction="none")
+            weights, grpo_stats = grpo_weights_provider.compute_batch_weights(
+                batch=batch,
+                per_sample_loss=per_sample_loss.detach(),
+            )
+            weights = weights.to(device=per_sample_loss.device, dtype=per_sample_loss.dtype).detach()
+            loss = (per_sample_loss * weights).sum() / weights.sum().clamp_min(1e-6)
+            output_dict.update(grpo_stats)
         else:
             loss, output_dict = policy.forward(batch)
 
@@ -311,6 +328,22 @@ def train(cfg: TrainPipelineConfig, accelerator: Accelerator | None = None):
             device=device,
         )
 
+    grpo_weights_provider = None
+    if cfg.use_grpo:
+        if cfg.use_rabc:
+            raise ValueError("use_grpo and use_rabc cannot both be true.")
+        grpo_weights_provider = ACTGRPOWeights(
+            ACTGRPOWeightConfig(
+                beta=cfg.grpo_beta,
+                min_weight=cfg.grpo_min_weight,
+                max_weight=cfg.grpo_max_weight,
+                bc_reward_weight=cfg.grpo_bc_reward_weight,
+                smooth_reward_weight=cfg.grpo_smooth_reward_weight,
+                accel_reward_weight=cfg.grpo_accel_reward_weight,
+                gripper_reward_weight=cfg.grpo_gripper_reward_weight,
+            )
+        )
+
     step = 0  # number of policy updates (forward + backward + optim)
 
     if cfg.resume:
@@ -409,6 +442,7 @@ def train(cfg: TrainPipelineConfig, accelerator: Accelerator | None = None):
             accelerator=accelerator,
             lr_scheduler=lr_scheduler,
             rabc_weights_provider=rabc_weights,
+            grpo_weights_provider=grpo_weights_provider,
         )
 
         # Note: eval and checkpoint happens *after* the `step`th training update has completed, so we
@@ -421,6 +455,12 @@ def train(cfg: TrainPipelineConfig, accelerator: Accelerator | None = None):
 
         if is_log_step:
             logging.info(train_tracker)
+            if output_dict:
+                scalar_output_dict = {
+                    key: value for key, value in output_dict.items() if isinstance(value, (int, float))
+                }
+                if scalar_output_dict:
+                    logging.info(pformat(scalar_output_dict))
             if wandb_logger:
                 wandb_log_dict = train_tracker.to_dict()
                 if output_dict:

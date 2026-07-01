@@ -163,9 +163,21 @@ wandb/
 # Dev scripts
 .dev/
 
-# Data folders
-data/
-outputs/
+# Root-level data folders
+/data/
+/outputs/
+/datasets/
+/checkpoints/
+/models/
+/artifacts/
+/results/
+annotation_workspace*/
+
+# Local machine and robot deployment config
+*.local
+*.local.*
+local_config.*
+robot_config.local.*
 
 # Translations
 *.mo
@@ -177,3 +189,25 @@ outputs/
 *.urdf
 *.xml
 *.part
+
+# Model weights and experiment artifacts
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+*.engine
+*.bin
+
+# Archives and extracted release bundles
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+!firm-sft-grpo.rar
+firm/
+
+# Genesis runtime extraction
+benchmarks/video/genesis_firm_sim/assets/
+benchmarks/video/genesis_firm_sim/outputs/

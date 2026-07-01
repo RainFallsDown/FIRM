@@ -1,0 +1,12 @@
+# Haimiandian transform configuration
+transforms:
+  haimiandian:
+    _target_: groot.vla.data.transform.ConcatTransform
+    video_concat_order:
+      - head
+      - hand_left
+      - hand_right
+    state_concat_order:
+      - state
+    action_concat_order:
+      - action

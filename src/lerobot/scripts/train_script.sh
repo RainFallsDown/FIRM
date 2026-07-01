@@ -1,6 +1,6 @@
-dataset=pc_shuomingshu_task_7_485_1773627018
+﻿dataset=pc_shuomingshu_task_7_485_1773627018
 project_name=${dataset}_diffusion_default_steps_150000_mini_batch_16_img_transform_no_crop_resize_224_resnet_pretrain 
-data_root=/DATA/disk0/home/yangwu/data
+data_root=${LEROBOT_DATA_ROOT:-/path/to/data}
 
 accelerate launch \
   --multi_gpu \

@@ -1,0 +1,27 @@
+# LingBot-VA environment
+# Recommended Python: 3.10
+
+torch==2.9.0
+torchvision==0.24.0
+torchaudio==2.9.0
+diffusers==0.36.0
+transformers>=4.55.4,<4.56.0
+tokenizers>=0.21.4,<0.22.0
+accelerate>=1.10.0,<2.0.0
+einops>=0.8.0,<0.9.0
+easydict>=1.13,<2.0
+flash-attn>=2.5.9,<3.0.0
+numpy==1.26.4
+tqdm>=4.66.0,<5.0.0
+imageio[ffmpeg]>=2.34.0,<3.0.0
+websockets>=13.0,<16.0
+msgpack>=1.0.0,<2.0.0
+opencv-python>=4.8.0,<5.0.0
+matplotlib>=3.8.0,<4.0.0
+ftfy>=6.2.0,<7.0.0
+safetensors>=0.4.3,<1.0.0
+Pillow>=10.0.0,<13.0.0
+lerobot==0.3.3
+scipy>=1.10.1,<1.15.0
+wandb>=0.17.0,<1.0.0
+pytest>=8.0.0,<9.0.0
