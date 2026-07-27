@@ -18,12 +18,12 @@ class TaskRegistryTest(unittest.TestCase):
 
     def test_instruction_manual_metadata(self):
         spec = get_task_spec("instruction_manual")
-        self.assertEqual(spec.object_class, "bi-fold hinged sheet proxy")
+        self.assertEqual(spec.object_class, "five-layer hinged paper proxy")
         self.assertEqual(spec.scene_name, "instruction_manual")
 
     def test_tape_metadata(self):
         spec = get_task_spec("tape_manipulation")
-        self.assertEqual(spec.object_class, "rigid cylindrical proxy")
+        self.assertEqual(spec.object_class, "rigid annulus proxy")
         self.assertEqual(spec.scene_name, "tape_manipulation")
 
     def test_cable_metadata(self):

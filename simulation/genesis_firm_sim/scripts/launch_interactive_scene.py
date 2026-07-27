@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from argparse import ArgumentParser
+import json
 from pathlib import Path
 import sys
 import time
@@ -14,11 +15,13 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from firm_sim.scenes import (
-    build_common_workspace_scene,
-    build_instruction_manual_scene,
+from firm_sim.tasks import (
+    build_task_scene,
+    perturbation_axes,
+    perturbation_levels,
+    sample_perturbation,
+    task_names,
 )
-from firm_sim.tasks import build_task_scene, task_names
 
 
 DROP_OFFSETS = {
@@ -30,33 +33,61 @@ DROP_OFFSETS = {
 def main() -> int:
     parser = ArgumentParser()
     parser.add_argument("--headless", action="store_true")
-    parser.add_argument("--layer", type=int, choices=(1, 2), default=2)
     parser.add_argument(
         "--scene",
-        choices=("common", *task_names()),
+        choices=task_names(),
         default="instruction_manual",
     )
     parser.add_argument("--max-steps", type=int, default=0)
     parser.add_argument("--drop-height", type=float, default=0.18)
+    parser.add_argument("--perturbation-level", choices=perturbation_levels(), default="nominal")
+    parser.add_argument("--perturbation-axis", choices=perturbation_axes(), default="none")
+    parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
 
-    if args.scene == "common":
-        builder = build_common_workspace_scene
-    else:
-        builder = lambda show_viewer: build_task_scene(args.scene, show_viewer=show_viewer)
+    perturbation = sample_perturbation(
+        level=args.perturbation_level,
+        axis=args.perturbation_axis,
+        seed=args.seed,
+    )
+
+    builder = lambda show_viewer: build_task_scene(
+        args.scene,
+        show_viewer=show_viewer,
+        perturbation=perturbation,
+    )
     scene, entities = builder(show_viewer=not args.headless)
 
     offset_x, offset_y = DROP_OFFSETS.get(args.scene, (0.0, 0.0))
     drop_entity_name = {
-        "cable_manipulation": "cable_assembly",
         "tape_manipulation": "tape_proxy",
     }.get(args.scene)
-    if drop_entity_name is not None and drop_entity_name in entities and args.drop_height > 0.0:
+    if args.scene == "cable_manipulation" and "cable_connected_line_proxy" in entities and args.drop_height > 0.0:
+        line = entities["cable_connected_line_proxy"]
+        particles = line.get_particles_pos().detach().cpu().numpy()
+        particles += np.array([offset_x, offset_y, args.drop_height], dtype=np.float32)
+        line.set_particles_pos(particles)
+        mouse = entities["cable_connected_mouse"]
+        mouse_pos = mouse.get_pos().detach().cpu().numpy()
+        mouse_pos += np.array([offset_x, offset_y, args.drop_height], dtype=np.float32)
+        mouse.set_pos(
+            mouse_pos,
+            relative=False,
+            zero_velocity=True,
+        )
+    elif drop_entity_name is not None and drop_entity_name in entities and args.drop_height > 0.0:
         drop_entity = entities[drop_entity_name]
-        drop_entity.set_pos((offset_x, offset_y, args.drop_height), relative=True, zero_velocity=True)
+        position = drop_entity.get_pos().detach().cpu().numpy()
+        position += np.array([offset_x, offset_y, args.drop_height], dtype=np.float32)
+        drop_entity.set_pos(position, relative=False, zero_velocity=True)
 
-    print(f"Genesis layer-{args.layer} scene '{args.scene}' is ready.")
+    print(
+        f"Genesis FIRM scene '{args.scene}' is ready "
+        "with the released FIRM physical parameters."
+    )
     print(f"Loaded entities: {', '.join(sorted(entities.keys()))}")
+    print("Perturbation sample:")
+    print(json.dumps(perturbation.as_dict(), indent=2, sort_keys=True))
     if args.headless:
         print("Running headless. Press Ctrl-C to stop.")
     else:

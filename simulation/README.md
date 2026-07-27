@@ -15,10 +15,11 @@ VIDEO_BENCHMARK.md      Video benchmark notes
 
 ```bash
 cd simulation/genesis_firm_sim
+pip install -r requirements.txt
 python scripts/list_task_scenes.py
 python scripts/launch_interactive_scene.py --scene instruction_manual
 python scripts/render_scene_snapshot.py --scene box_folding --output outputs/box_folding.png
-python -m unittest tests/test_task_registry.py
+pytest -q
 ```
 
 ## FIRM Benchmark
