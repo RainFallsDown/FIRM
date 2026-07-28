@@ -1,126 +1,108 @@
-﻿# Genesis FIRM-Sim Scenes
+# Genesis FIRM-Sim
 
-Genesis-first reconstruction of the **FIRM-Sim** portion of the paper **FIRM: A Benchmark for Industrial Flexible-Object Robot Manipulation**.
+[中文说明](README_zh-CN.md)
 
-This subdirectory focuses on a practical goal: make the core FIRM task scenes runnable, inspectable, and easy to extend in **Genesis World**, before plugging in policies or VLA systems.
+Genesis World implementation of the simulation scenes used by **FIRM: A Benchmark for Industrial Flexible-Object Robot Manipulation**.
 
-## What This Repo Covers
-
-From the paper, FIRM targets industrial mixed-stiffness manipulation under fixtures, containers, and tight spatial constraints. Here we currently focus on the **simulation scene layer** of that benchmark:
-
-- shared workcell with table, box, target region, and robot
-- Genesis-only task scene construction
-- interactive scene launching for rapid visual inspection
-- proxy object setup for flexible and semi-rigid manipulation tasks
-
-This repo currently does **not** include:
-
-- policy training
-- VLA integration
-- DAP evaluation implementation
-- full FIRM-Real / FIRM-Web benchmark release
+This package focuses on reproducible scene construction and physical interaction. It does not include policy training, VLA integration, or the FIRM benchmark evaluation pipeline.
 
 ## Implemented Scenes
 
-All scenes share the same workcell and robot placement, while keeping task objects independent:
-
-| Scene | Paper object type | Current Genesis proxy |
+| Scene | Object model | Initial box state |
 | --- | --- | --- |
-| `instruction_manual` | flexible / semi-rigid manual | bi-fold hinged sheet proxy |
-| `sponge_pad` | thin deformable pad | cloth-like deformable sheet |
-| `tape_manipulation` | tape roll | rigid cylindrical proxy |
-| `cable_manipulation` | bundled cable + rigid end object | bundled cable mesh + rigid mouse proxy |
-| `box_folding` | cardboard box component | articulated box with hinged lid |
+| `instruction_manual` | five full-size paper layers in one bound booklet | fixed open outward |
+| `sponge_pad` | thin PBD deformable pad | fixed open outward |
+| `tape_manipulation` | mass-matched hollow rigid annulus | fixed open outward |
+| `cable_manipulation` | flexible bundled PBD cable connected to a rigid mouse | fixed open outward |
+| `box_folding` | articulated cardboard box with a hinged graspable lid | closed |
 
-## Directory Layout
-
-```text
-firm_sim/
-  runtime.py                # Genesis init helper
-  scenes/
-    layer1_workspace.py     # shared workcell + all scene builders
-  tasks/
-    registry.py             # task registry and scene metadata
-scripts/
-  list_task_scenes.py       # list available scenes
-  launch_interactive_scene.py
-  render_scene_snapshot.py
-docs/
-  scene_parameters.md
-```
+All scenes use the same table, box geometry, target region, and Tianqing robot placement. Task objects start on the tabletop in front of the box. The released configuration contains the current geometry, mass, friction, compliance, damping, collision, and solver settings.
 
 ## Quickstart
-
-### 1. Environment
-
-Install Genesis World and make sure this succeeds:
-
-```bash
-python -c "import genesis; print('Genesis OK')"
-```
-
-If you want to version the robot asset in GitHub, install Git LFS:
-
-```bash
-git lfs install
-```
-
-### 2. Clone
 
 ```bash
 git clone https://github.com/RainFallsDown/FIRM.git
 cd FIRM/simulation/genesis_firm_sim
-git lfs pull
+git lfs pull --include="simulation/genesis_firm_sim/tianqing_urdf.zip"
+
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-### 3. Launch a Scene
-
-List all implemented scenes:
+Verify the installation and list the scenes:
 
 ```bash
+python -c "import genesis as gs; print(gs.__version__)"
 python scripts/list_task_scenes.py
 ```
 
-Start an interactive viewer:
+Launch an interactive scene:
 
 ```bash
-python scripts/launch_interactive_scene.py --scene instruction_manual
 python scripts/launch_interactive_scene.py --scene sponge_pad
-python scripts/launch_interactive_scene.py --scene tape_manipulation
-python scripts/launch_interactive_scene.py --scene cable_manipulation
-python scripts/launch_interactive_scene.py --scene box_folding
 ```
 
-Render an offscreen snapshot:
+Replace `sponge_pad` with `instruction_manual`, `tape_manipulation`, `cable_manipulation`, or `box_folding`.
+
+## Reproducible Perturbations
+
+The launcher supports deterministic perturbation levels and isolated axes:
 
 ```bash
-python scripts/render_scene_snapshot.py --scene box_folding --output outputs/box_folding.png
+python scripts/launch_interactive_scene.py \
+  --scene sponge_pad \
+  --perturbation-level high \
+  --perturbation-axis object_translation \
+  --seed 22
 ```
 
-Run the lightweight registry test:
+Available levels are `nominal`, `low`, `medium`, `medium_high`, and `high`, corresponding to normalized strengths `0`, `0.25`, `0.50`, `0.75`, and `1.00`. Available axes are `none`, `object_translation`, `fixture_translation`, `object_yaw`, `pose_noise`, `rgb_noise`, `depth_noise`, and `combined`.
+
+## Offscreen Rendering
 
 ```bash
-python -m unittest tests/test_task_registry.py
+python scripts/render_scene_snapshot.py \
+  --scene instruction_manual \
+  --camera-preset overhead \
+  --output outputs/instruction_manual.png
 ```
 
-## Robot Asset
+The renderer writes a PNG and a JSON sidecar containing the scene, physical configuration, seed, and perturbation values.
 
-The shared workcell currently uses the local robot asset:
+## Validation
 
-- `tianqing_urdf.zip`
+Run the lightweight configuration and geometry tests:
 
-At runtime, the code automatically extracts it into:
+```bash
+python -m pytest -q
+```
 
-- `assets/tianqing_urdf/`
+The tests check task registration, perturbation determinism, solver configuration, physical mass targets, hollow tape geometry, five-layer manual construction, box-lid initial states, tabletop contact, and object placement.
 
-This extracted folder is intentionally ignored in Git because it is runtime-generated.
+## Repository Layout
 
-## Active Conventions
+```text
+firm_sim/
+  perturbations.py
+  physical_parameters.py
+  runtime.py
+  scenes/
+    workspace.py
+  tasks/
+scripts/
+  launch_interactive_scene.py
+  list_task_scenes.py
+  render_scene_snapshot.py
+tests/
+docs/
+  physics_parameters.md
+  scene_parameters.md
+tianqing_urdf.zip
+```
 
-- **Genesis World** is the only active simulation path.
-- New scenes, assets, and runtime scripts should stay on the Genesis path.
+The robot archive is managed with Git LFS and extracted to `assets/tianqing_urdf/` on first launch. MJCF and OBJ collision proxies are generated from the versioned scene parameters at runtime.
 
-## Notes
+## Model Scope
 
-- `docs/scene_parameters.md` records the confirmed scene dimensions used in the current setup.
-- Runtime-generated assets under `assets/tianqing_urdf/` are ignored and will be recreated automatically from `tianqing_urdf.zip`.
+The current cable and sponge use PBD proxies. The cable preserves a physical connection to the rigid mouse, while the sponge reproduces thin-sheet bending and tabletop contact. See [`docs/physics_parameters.md`](docs/physics_parameters.md) for the exact solver settings, parameter mappings, perturbation ranges, and current model limitations.

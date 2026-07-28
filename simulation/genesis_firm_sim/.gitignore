@@ -2,6 +2,6 @@
 __pycache__/
 *.py[cod]
 outputs/
-*.mp4
 assets/tianqing_urdf/
-!firm_sim/scenes/generated_assets/*.xml
+firm_sim/scenes/generated_assets/
+.pytest_cache/

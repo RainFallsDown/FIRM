@@ -89,7 +89,9 @@ This module is independent from real-robot deployment code. It consumes recorded
 simulation/genesis_firm_sim/
 ├── firm_sim/
 │   ├── runtime.py
-│   ├── scenes/layer1_workspace.py
+│   ├── physical_parameters.py
+│   ├── perturbations.py
+│   ├── scenes/workspace.py
 │   └── tasks/registry.py
 ├── scripts/
 │   ├── list_task_scenes.py

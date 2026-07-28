@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from importlib import import_module
-
+from firm_sim.perturbations import PerturbationSample
+from firm_sim import scenes as scene_builders
 from firm_sim.tasks.base import TaskSceneSpec
 
 
@@ -12,9 +12,9 @@ TASK_SCENE_REGISTRY: dict[str, tuple[TaskSceneSpec, str]] = {
         TaskSceneSpec(
             name="instruction_manual",
             scene_name="instruction_manual",
-            object_class="bi-fold hinged sheet proxy",
-            description="Insert a foldable bi-fold instruction manual into the box fixture.",
-            notes="Uses the shared articulated-box workspace with a center-hinged instruction manual and an outward-open box lid.",
+            object_class="five-layer bound booklet proxy",
+            description="Insert a five-sheet bound instruction manual into the box fixture.",
+            notes="Uses five full-size paper layers in one booklet body and a fixed outward-open box lid.",
         ),
         "build_instruction_manual_scene",
     ),
@@ -22,7 +22,7 @@ TASK_SCENE_REGISTRY: dict[str, tuple[TaskSceneSpec, str]] = {
         TaskSceneSpec(
             name="sponge_pad",
             scene_name="sponge_pad",
-            object_class="3D volumetric deformable",
+            object_class="thin PBD deformable pad",
             description="Place a sponge pad into the same box fixture.",
             notes="Uses the shared table workspace with the articulated cardboard box base and an outward-open lid.",
         ),
@@ -52,7 +52,7 @@ TASK_SCENE_REGISTRY: dict[str, tuple[TaskSceneSpec, str]] = {
         TaskSceneSpec(
             name="tape_manipulation",
             scene_name="tape_manipulation",
-            object_class="rigid cylindrical proxy",
+            object_class="rigid annulus proxy",
             description="Manipulate a tape roll on the shared table workspace.",
             notes="First Genesis proxy uses the documented tape diameter and width in the same central spawn zone as the sponge scene.",
         ),
@@ -73,13 +73,21 @@ def get_task_spec(name: str) -> TaskSceneSpec:
         raise KeyError(f"Unknown task scene '{name}'. Available task scenes: {available}") from exc
 
 
-def build_task_scene(name: str, show_viewer: bool = True, camera_specs: dict[str, object] | None = None):
+def build_task_scene(
+    name: str,
+    show_viewer: bool = True,
+    camera_specs: dict[str, object] | None = None,
+    perturbation: PerturbationSample | None = None,
+):
     try:
         _, builder_name = TASK_SCENE_REGISTRY[name]
     except KeyError as exc:
         available = ", ".join(task_names())
         raise KeyError(f"Unknown task scene '{name}'. Available task scenes: {available}") from exc
 
-    scenes_module = import_module("firm_sim.scenes")
-    builder = getattr(scenes_module, builder_name)
-    return builder(show_viewer=show_viewer, camera_specs=camera_specs)
+    builder = getattr(scene_builders, builder_name)
+    return builder(
+        show_viewer=show_viewer,
+        camera_specs=camera_specs,
+        perturbation=perturbation,
+    )
