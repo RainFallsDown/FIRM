@@ -10,10 +10,10 @@ This package focuses on reproducible scene construction and physical interaction
 
 | Scene | Object model | Initial box state |
 | --- | --- | --- |
-| `instruction_manual` | five explicit paper layers with a shared crease hinge | open outward |
-| `sponge_pad` | thin PBD deformable pad | open outward |
-| `tape_manipulation` | mass-matched hollow rigid annulus | open outward |
-| `cable_manipulation` | flexible bundled PBD cable connected to a rigid mouse | open outward |
+| `instruction_manual` | five full-size paper layers in one bound booklet | fixed open outward |
+| `sponge_pad` | thin PBD deformable pad | fixed open outward |
+| `tape_manipulation` | mass-matched hollow rigid annulus | fixed open outward |
+| `cable_manipulation` | flexible bundled PBD cable connected to a rigid mouse | fixed open outward |
 | `box_folding` | articulated cardboard box with a hinged graspable lid | closed |
 
 All scenes use the same table, box geometry, target region, and Tianqing robot placement. Task objects start on the tabletop in front of the box. The released configuration contains the current geometry, mass, friction, compliance, damping, collision, and solver settings.
@@ -57,7 +57,7 @@ python scripts/launch_interactive_scene.py \
   --seed 22
 ```
 
-Available levels are `nominal`, `low`, `medium`, and `high`. Available axes are `none`, `object_translation`, `fixture_translation`, `object_yaw`, `pose_noise`, `rgb_noise`, `depth_noise`, and `combined`.
+Available levels are `nominal`, `low`, `medium`, `medium_high`, and `high`, corresponding to normalized strengths `0`, `0.25`, `0.50`, `0.75`, and `1.00`. Available axes are `none`, `object_translation`, `fixture_translation`, `object_yaw`, `pose_noise`, `rgb_noise`, `depth_noise`, and `combined`.
 
 ## Offscreen Rendering
 
@@ -75,7 +75,7 @@ The renderer writes a PNG and a JSON sidecar containing the scene, physical conf
 Run the lightweight configuration and geometry tests:
 
 ```bash
-pytest -q
+python -m pytest -q
 ```
 
 The tests check task registration, perturbation determinism, solver configuration, physical mass targets, hollow tape geometry, five-layer manual construction, box-lid initial states, tabletop contact, and object placement.

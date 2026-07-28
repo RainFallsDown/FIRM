@@ -45,6 +45,9 @@ PERTURBATION_LEVELS = {
     "nominal": PerturbationLevel("nominal", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
     "low": PerturbationLevel("low", 0.010, 0.005, 5.0, 0.0025, 1.25, 2.5 / 255.0, 0.00125),
     "medium": PerturbationLevel("medium", 0.020, 0.010, 10.0, 0.005, 2.5, 5.0 / 255.0, 0.0025),
+    "medium_high": PerturbationLevel(
+        "medium_high", 0.030, 0.015, 15.0, 0.0075, 3.75, 7.5 / 255.0, 0.00375
+    ),
     "high": PerturbationLevel("high", 0.040, 0.020, 20.0, 0.010, 5.0, 10.0 / 255.0, 0.005),
 }
 

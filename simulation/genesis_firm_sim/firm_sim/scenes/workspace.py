@@ -580,8 +580,8 @@ def _generated_box_folding_mjcf_path(
         if task_object == "box"
         else spec.box_fold_lid_open_angle_outward
     )
-    pose_name = "closed" if task_object == "box" else "outward"
-    xml_path = output_dir / f"box_folding_hinged_{pose_name}.xml"
+    box_mode = "hinged_closed" if task_object == "box" else "fixed_open"
+    xml_path = output_dir / f"box_{box_mode}.xml"
 
     base_x, base_y, base_t = spec.box_fold_base_size
     wall_h = spec.box_fold_wall_height
@@ -590,7 +590,17 @@ def _generated_box_folding_mjcf_path(
     lid_depth = (base_y - wall_t) * 1.25
     lid_depth_half = lid_depth / 2.0
 
-    xml = f"""<mujoco model="box_folding_hinged">
+    if task_object == "box":
+        lid_body_pose = ""
+        lid_joint_xml = f"""        <joint name="lid_hinge" type="hinge" axis="1 0 0" limited="true" range="0 2.9"
+               stiffness="{physics_profile.box_hinge_stiffness:.6f}"
+               damping="{physics_profile.box_hinge_damping:.6f}"
+               springref="{lid_rest_angle:.6f}"/>"""
+    else:
+        lid_body_pose = f' euler="{lid_rest_angle:.6f} 0 0"'
+        lid_joint_xml = ""
+
+    xml = f"""<mujoco model="box_{box_mode}">
   <compiler angle="radian"/>
   <worldbody>
     <body name="box_root">
@@ -599,11 +609,8 @@ def _generated_box_folding_mjcf_path(
       <geom name="right_wall" type="box" pos="{base_x / 2 - wall_t / 2:.6f} 0 {wall_h / 2:.6f}" size="{wall_t / 2:.6f} {base_y / 2:.6f} {wall_h / 2:.6f}"/>
       <geom name="front_wall" type="box" pos="0 {base_y / 2 - wall_t / 2:.6f} {wall_h / 2:.6f}" size="{base_x / 2:.6f} {wall_t / 2:.6f} {wall_h / 2:.6f}"/>
       <geom name="back_wall" type="box" pos="0 {-base_y / 2 + wall_t / 2:.6f} {wall_h / 2:.6f}" size="{base_x / 2:.6f} {wall_t / 2:.6f} {wall_h / 2:.6f}"/>
-      <body name="lid" pos="0 {-base_y / 2 + wall_t / 2:.6f} {wall_h + lid_t / 2:.6f}">
-        <joint name="lid_hinge" type="hinge" axis="1 0 0" limited="true" range="0 2.9"
-               stiffness="{physics_profile.box_hinge_stiffness:.6f}"
-               damping="{physics_profile.box_hinge_damping:.6f}"
-               springref="{lid_rest_angle:.6f}"/>
+      <body name="lid" pos="0 {-base_y / 2 + wall_t / 2:.6f} {wall_h + lid_t / 2:.6f}"{lid_body_pose}>
+{lid_joint_xml}
         <geom name="lid_panel" type="box" pos="0 {lid_depth_half:.6f} 0" size="{base_x / 2:.6f} {lid_depth_half:.6f} {lid_t / 2:.6f}"/>
       </body>
     </body>
@@ -633,44 +640,27 @@ def _generated_instruction_manual_mjcf_path(
 ) -> Path:
     output_dir = Path(__file__).resolve().parent / "generated_assets"
     output_dir.mkdir(parents=True, exist_ok=True)
-    xml_path = output_dir / "instruction_manual_bifold.xml"
+    xml_path = output_dir / "instruction_manual_booklet.xml"
 
     manual_x, manual_y, manual_t = spec.manual_size
-    page_half_x = manual_x / 4.0
-    page_half_y = manual_y / 2.0
     sheet_count = 5
     sheet_thickness = manual_t / sheet_count
     sheet_half_t = sheet_thickness / 2.0
-    left_geoms = []
-    right_geoms = []
+    sheet_geoms = []
     for index in range(sheet_count):
         z = (index - (sheet_count - 1) / 2.0) * sheet_thickness
         sheet_number = index + 1
-        left_geoms.append(
-            f'      <geom name="left_sheet_{sheet_number}" type="box" '
-            f'pos="{-page_half_x:.6f} 0 {z:.6f}" '
-            f'size="{page_half_x:.6f} {page_half_y:.6f} {sheet_half_t:.6f}"/>'
+        sheet_geoms.append(
+            f'      <geom name="booklet_sheet_{sheet_number}" type="box" '
+            f'pos="0 0 {z:.6f}" '
+            f'size="{manual_x / 2.0:.6f} {manual_y / 2.0:.6f} {sheet_half_t:.6f}"/>'
         )
-        right_geoms.append(
-            f'        <geom name="right_sheet_{sheet_number}" type="box" '
-            f'pos="{page_half_x:.6f} 0 {z:.6f}" '
-            f'size="{page_half_x:.6f} {page_half_y:.6f} {sheet_half_t:.6f}"/>'
-        )
-    left_geometry_xml = "\n".join(left_geoms)
-    right_geometry_xml = "\n".join(right_geoms)
 
-    xml = f"""<mujoco model="instruction_manual_bifold">
+    xml = f"""<mujoco model="instruction_manual_booklet">
   <compiler angle="radian"/>
   <worldbody>
-    <body name="manual_root">
-{left_geometry_xml}
-      <body name="right_page" pos="0 0 0">
-        <joint name="manual_hinge" type="hinge" axis="0 1 0" limited="true" range="-2.6 2.6"
-               stiffness="{physics_profile.manual_hinge_stiffness:.6f}"
-               damping="{physics_profile.manual_hinge_damping:.6f}"
-               springref="{spec.manual_fold_angle:.6f}"/>
-{right_geometry_xml}
-      </body>
+    <body name="manual_booklet">
+{"\n".join(sheet_geoms)}
     </body>
   </worldbody>
 </mujoco>
@@ -741,18 +731,17 @@ def _initialize_box_folding_proxy(
     entities: dict[str, object],
     task_object: str,
 ) -> None:
+    if task_object != "box":
+        return
     box = entities["box_folding_proxy"]
-    lid_angle = (
-        spec.box_fold_lid_closed_angle
-        if task_object == "box"
-        else spec.box_fold_lid_open_angle_outward
+    box.set_dofs_position(
+        np.array([spec.box_fold_lid_closed_angle], dtype=np.float32),
+        zero_velocity=True,
     )
-    box.set_dofs_position(np.array([lid_angle], dtype=np.float32), zero_velocity=True)
 
 
 def _initialize_instruction_manual_proxy(spec: WorkspaceSpec, entities: dict[str, object]) -> None:
-    manual = entities["manual_booklet"]
-    manual.set_dofs_position(np.array([spec.manual_fold_angle], dtype=np.float32), zero_velocity=True)
+    return
 
 
 def _generated_cable_connected_mouse_mesh_path(spec: WorkspaceSpec) -> Path:

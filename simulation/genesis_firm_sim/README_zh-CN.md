@@ -6,10 +6,10 @@
 
 | 场景名称 | 操作对象 | 盒盖初始状态 |
 | --- | --- | --- |
-| `instruction_manual` | 五层纸张组成、中央带折痕合页的说明书 | 向外打开 |
-| `sponge_pad` | 薄型 PBD 可变形泡棉垫 | 向外打开 |
-| `tape_manipulation` | 质量匹配的空心刚性胶带卷 | 向外打开 |
-| `cable_manipulation` | 与刚性鼠标物理连接的柔性成束线缆 | 向外打开 |
+| `instruction_manual` | 五张完整纸层组成的装订说明书 | 固定向外打开 |
+| `sponge_pad` | 薄型 PBD 可变形泡棉垫 | 固定向外打开 |
+| `tape_manipulation` | 质量匹配的空心刚性胶带卷 | 固定向外打开 |
+| `cable_manipulation` | 与刚性鼠标物理连接的柔性成束线缆 | 固定向外打开 |
 | `box_folding` | 带可抓取加长边和顶部合页的纸盒 | 关闭 |
 
 五个场景共用桌子、纸盒、目标区域和天擎机器人位置。待操作物体默认放在桌面上、纸盒正前方的中心线上。
@@ -57,7 +57,7 @@ python scripts/launch_interactive_scene.py \
   --seed 22
 ```
 
-扰动等级包括 `nominal`、`low`、`medium` 和 `high`。扰动轴包括 `none`、`object_translation`、`fixture_translation`、`object_yaw`、`pose_noise`、`rgb_noise`、`depth_noise` 和 `combined`。
+扰动等级包括 `nominal`、`low`、`medium`、`medium_high` 和 `high`，分别对应归一化强度 `0`、`0.25`、`0.50`、`0.75` 和 `1.00`。扰动轴包括 `none`、`object_translation`、`fixture_translation`、`object_yaw`、`pose_noise`、`rgb_noise`、`depth_noise` 和 `combined`。
 
 ## 离屏渲染
 
@@ -73,7 +73,7 @@ python scripts/render_scene_snapshot.py \
 ## 测试
 
 ```bash
-pytest -q
+python -m pytest -q
 ```
 
 测试覆盖场景注册、扰动可复现性、求解器配置、质量目标、空心胶带几何、五层说明书、盒盖初始状态、桌面接触和物体摆放位置。

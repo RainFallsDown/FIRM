@@ -19,15 +19,15 @@ Replace `cable_manipulation` with `instruction_manual`, `sponge_pad`, `tape_mani
 | Box equivalent density | 61 kg/m³ |
 | Manual geometry | 200 × 150 × 0.5 mm, five explicit 0.1 mm paper layers |
 | Manual equivalent density | 800 kg/m³, approximately 12 g total |
-| Manual hinge | 0.010 N·m/rad stiffness + 0.0015 N·m·s/rad damping |
+| Manual binding | five full-size sheets in one rigid booklet body, without a central hinge |
 | Box footprint | 245 × 180 mm |
 | Box-lid hinge | 0.20 N·m/rad stiffness + damping |
 | Table/object friction | 0.3–0.8 by contact class |
 | Cable | PBD flexible line physically attached to the rigid mouse body |
 
-The first four scenes start with the box lid clearly open outward at `2.80 rad`. Only the dedicated box-folding scene starts closed at `0 rad`. The cable, tape, sponge, and manual nominal spawn region is centered at `(0.55, 0.18)` m, directly in front of the box on its centerline.
+The first four scenes use a fixed box lid that remains open outward at `2.80 rad`. Only the dedicated box-folding scene has a dynamic hinge and starts closed at `0 rad`. The cable, tape, sponge, and manual nominal spawn region is centered at `(0.55, 0.18)` m, directly in front of the box on its centerline.
 
-The unfolded manual is `200 × 150 mm`. The box interior is approximately `237 × 172 mm` after subtracting the 4 mm walls, leaving 18.5 mm and 11 mm clearance per side. The five paper layers share one articulated crease hinge; inter-page sliding is not yet modeled.
+The manual is `200 × 150 mm`. The box interior is approximately `237 × 172 mm` after subtracting the 4 mm walls, leaving 18.5 mm and 11 mm clearance per side. The five full-size paper layers form one rigid booklet proxy; page bending and inter-page sliding are not yet modeled.
 
 The sponge is `196 × 144 mm` and the box footprint is `245 × 180 mm`, so the nominal sponge is exactly 80% of the box in both planar dimensions. A `high` object-translation perturbation moves the sponge by 40 mm, which is intentionally larger than the nominal 18–24.5 mm per-side clearance and can therefore place part of the pad outside the box. Use `nominal + none` when inspecting geometry rather than robustness.
 
@@ -47,6 +47,7 @@ Rigid collision is enabled, rigid self-collision is disabled, and the PBD partic
 | `nominal` | 0 mm | 0 mm | 0° | 0 mm / 0° | 0 | 0 mm |
 | `low` | 10 mm | 5 mm | 5° | 2.5 mm / 1.25° | 2.5/255 | 1.25 mm |
 | `medium` | 20 mm | 10 mm | 10° | 5 mm / 2.5° | 5/255 | 2.5 mm |
+| `medium_high` | 30 mm | 15 mm | 15° | 7.5 mm / 3.75° | 7.5/255 | 3.75 mm |
 | `high` | 40 mm | 20 mm | 20° | 10 mm / 5° | 10/255 | 5 mm |
 
 Each evaluation condition records `level`, `axis`, and `seed`. Translation uses the exact level magnitude with a seeded planar direction; yaw uses a seeded sign. RGB and depth values are maximum absolute uniform-noise amplitudes. PR-AUC should be reported separately for each axis. The `combined` axis is provided only for stress tests.

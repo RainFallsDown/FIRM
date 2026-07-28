@@ -69,8 +69,9 @@ FIRM_PHYSICS = PhysicalParameters(
     # Five 0.1 mm, 200 x 150 mm sheets weigh 12 g at this density.
     manual_density=800.0,
     manual_friction=0.35,
-    manual_hinge_stiffness=0.010,
-    manual_hinge_damping=1.5e-3,
+    # The five full-size sheets form one bound booklet with no central hinge.
+    manual_hinge_stiffness=0.0,
+    manual_hinge_damping=0.0,
     # PBD cloth rho is kg/m^2. This gives the 196 x 144 mm pad a 1.30 g mass.
     sponge_areal_density=0.046,
     sponge_static_friction=0.8,

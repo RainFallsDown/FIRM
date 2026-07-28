@@ -14,7 +14,18 @@ from firm_sim.perturbations import (
 
 class PerturbationsTest(unittest.TestCase):
     def test_disclosed_levels_are_available(self):
-        self.assertEqual(perturbation_levels(), ("nominal", "low", "medium", "high"))
+        self.assertEqual(
+            perturbation_levels(),
+            ("nominal", "low", "medium", "medium_high", "high"),
+        )
+        medium_high = get_perturbation_level("medium_high")
+        self.assertEqual(medium_high.object_translation_m, 0.030)
+        self.assertEqual(medium_high.fixture_translation_m, 0.015)
+        self.assertEqual(medium_high.object_yaw_deg, 15.0)
+        self.assertEqual(medium_high.pose_position_noise_m, 0.0075)
+        self.assertEqual(medium_high.pose_rotation_noise_deg, 3.75)
+        self.assertEqual(medium_high.rgb_noise, 7.5 / 255.0)
+        self.assertEqual(medium_high.depth_noise_m, 0.00375)
         high = get_perturbation_level("high")
         self.assertEqual(high.object_translation_m, 0.040)
         self.assertEqual(high.fixture_translation_m, 0.020)

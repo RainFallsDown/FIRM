@@ -12,9 +12,9 @@ TASK_SCENE_REGISTRY: dict[str, tuple[TaskSceneSpec, str]] = {
         TaskSceneSpec(
             name="instruction_manual",
             scene_name="instruction_manual",
-            object_class="five-layer hinged paper proxy",
-            description="Insert a foldable bi-fold instruction manual into the box fixture.",
-            notes="Uses the shared articulated-box workspace with a center-hinged instruction manual and an outward-open box lid.",
+            object_class="five-layer bound booklet proxy",
+            description="Insert a five-sheet bound instruction manual into the box fixture.",
+            notes="Uses five full-size paper layers in one booklet body and a fixed outward-open box lid.",
         ),
         "build_instruction_manual_scene",
     ),

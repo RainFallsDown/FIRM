@@ -19,6 +19,8 @@ class PhysicalParametersTest(unittest.TestCase):
         volume = 0.20 * 0.15 * 0.0005
         mass = volume * FIRM_PHYSICS.manual_density
         self.assertAlmostEqual(mass, 0.012, delta=1e-6)
+        self.assertEqual(FIRM_PHYSICS.manual_hinge_stiffness, 0.0)
+        self.assertEqual(FIRM_PHYSICS.manual_hinge_damping, 0.0)
 
     def test_solver_configuration_is_explicit(self):
         self.assertEqual(FIRM_PHYSICS.rigid_constraint_solver, "Newton")

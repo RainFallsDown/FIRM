@@ -13,24 +13,28 @@ from firm_sim.scenes.workspace import (
 
 
 class ScenePhysicsTest(unittest.TestCase):
-    def test_manual_hinge_uses_released_physical_parameters(self):
+    def test_manual_is_five_full_size_bound_sheets(self):
         spec = WorkspaceSpec()
         xml = _generated_instruction_manual_mjcf_path(spec, FIRM_PHYSICS).read_text()
-        self.assertIn('stiffness="0.010000"', xml)
-        self.assertIn('damping="0.001500"', xml)
-        self.assertIn('springref="0.000000"', xml)
-        self.assertEqual(xml.count('name="left_sheet_'), 5)
-        self.assertEqual(xml.count('name="right_sheet_'), 5)
-        self.assertEqual(xml.count('size="0.050000 0.075000 0.000050"'), 10)
+        self.assertNotIn('type="hinge"', xml)
+        self.assertNotIn('left_sheet_', xml)
+        self.assertNotIn('right_sheet_', xml)
+        self.assertEqual(xml.count('name="booklet_sheet_'), 5)
+        self.assertEqual(xml.count('size="0.100000 0.075000 0.000050"'), 5)
 
     def test_box_rest_angle_follows_scene_role(self):
         spec = WorkspaceSpec()
-        closed = _generated_box_folding_mjcf_path(spec, FIRM_PHYSICS, "box").read_text()
-        outward = _generated_box_folding_mjcf_path(spec, FIRM_PHYSICS, "manual").read_text()
+        closed_path = _generated_box_folding_mjcf_path(spec, FIRM_PHYSICS, "box")
+        outward_path = _generated_box_folding_mjcf_path(spec, FIRM_PHYSICS, "manual")
+        closed = closed_path.read_text()
+        outward = outward_path.read_text()
+        self.assertEqual(closed_path.name, "box_hinged_closed.xml")
+        self.assertEqual(outward_path.name, "box_fixed_open.xml")
         self.assertIn('stiffness="0.200000"', closed)
         self.assertIn('damping="0.007000"', closed)
         self.assertIn('springref="0.000000"', closed)
-        self.assertIn('springref="2.800000"', outward)
+        self.assertNotIn('name="lid_hinge"', outward)
+        self.assertIn('euler="2.800000 0 0"', outward)
 
     def test_only_box_folding_starts_closed(self):
         spec = WorkspaceSpec()
@@ -38,7 +42,8 @@ class ScenePhysicsTest(unittest.TestCase):
             xml = _generated_box_folding_mjcf_path(
                 spec, FIRM_PHYSICS, task_object
             ).read_text()
-            self.assertIn('springref="2.800000"', xml)
+            self.assertNotIn('name="lid_hinge"', xml)
+            self.assertIn('euler="2.800000 0 0"', xml)
 
     def test_task_objects_share_visible_spawn_region_beside_box(self):
         spec = WorkspaceSpec()

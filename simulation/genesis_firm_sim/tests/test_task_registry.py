@@ -18,7 +18,7 @@ class TaskRegistryTest(unittest.TestCase):
 
     def test_instruction_manual_metadata(self):
         spec = get_task_spec("instruction_manual")
-        self.assertEqual(spec.object_class, "five-layer hinged paper proxy")
+        self.assertEqual(spec.object_class, "five-layer bound booklet proxy")
         self.assertEqual(spec.scene_name, "instruction_manual")
 
     def test_tape_metadata(self):
