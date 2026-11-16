@@ -11,6 +11,7 @@ class TaskSceneSpec:
 
     name: str
     scene_name: str
+    object_entity: str
     object_class: str
     description: str
     notes: str

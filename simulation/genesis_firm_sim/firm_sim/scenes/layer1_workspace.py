@@ -58,79 +58,114 @@ class WorkspaceSpec:
 def build_layer1_scene(
     show_viewer: bool = True,
     camera_specs: dict[str, object] | None = None,
+    condition=None,
 ) -> tuple[gs.Scene, dict[str, object]]:
     """Build only the reusable common workspace."""
-    return build_common_workspace_scene(show_viewer=show_viewer, camera_specs=camera_specs)
+    return build_common_workspace_scene(
+        show_viewer=show_viewer, camera_specs=camera_specs, condition=condition,
+    )
 
 
 def build_layer2_scene(
     show_viewer: bool = True,
     camera_specs: dict[str, object] | None = None,
+    condition=None,
 ) -> tuple[gs.Scene, dict[str, object]]:
     """Backward-compatible alias for the instruction-manual scene."""
-    return build_instruction_manual_scene(show_viewer=show_viewer, camera_specs=camera_specs)
+    return build_instruction_manual_scene(
+        show_viewer=show_viewer, camera_specs=camera_specs, condition=condition,
+    )
 
 
 def build_common_workspace_scene(
     show_viewer: bool = True,
     camera_specs: dict[str, object] | None = None,
+    condition=None,
 ) -> tuple[gs.Scene, dict[str, object]]:
     """Build the shared table + box workspace without task objects."""
-    return _build_workspace(show_viewer=show_viewer, task_object="none", camera_specs=camera_specs)
+    return _build_workspace(
+        show_viewer=show_viewer, task_object="none",
+        camera_specs=camera_specs, condition=condition,
+    )
 
 
 def build_instruction_manual_scene(
     show_viewer: bool = True,
     camera_specs: dict[str, object] | None = None,
+    condition=None,
 ) -> tuple[gs.Scene, dict[str, object]]:
     """Build the instruction-manual insertion scene."""
-    return _build_workspace(show_viewer=show_viewer, task_object="manual", camera_specs=camera_specs)
+    return _build_workspace(
+        show_viewer=show_viewer, task_object="manual",
+        camera_specs=camera_specs, condition=condition,
+    )
 
 
 def build_sponge_pad_scene(
     show_viewer: bool = True,
     camera_specs: dict[str, object] | None = None,
+    condition=None,
 ) -> tuple[gs.Scene, dict[str, object]]:
     """Build the sponge-pad placement scene using the shared workspace."""
-    return _build_workspace(show_viewer=show_viewer, task_object="sponge", camera_specs=camera_specs)
+    return _build_workspace(
+        show_viewer=show_viewer, task_object="sponge",
+        camera_specs=camera_specs, condition=condition,
+    )
 
 
 def build_tape_scene(
     show_viewer: bool = True,
     camera_specs: dict[str, object] | None = None,
+    condition=None,
 ) -> tuple[gs.Scene, dict[str, object]]:
     """Build the tape-manipulation scene using the shared workspace."""
-    return _build_workspace(show_viewer=show_viewer, task_object="tape", camera_specs=camera_specs)
+    return _build_workspace(
+        show_viewer=show_viewer, task_object="tape",
+        camera_specs=camera_specs, condition=condition,
+    )
 
 
 def build_cable_scene(
     show_viewer: bool = True,
     camera_specs: dict[str, object] | None = None,
+    condition=None,
 ) -> tuple[gs.Scene, dict[str, object]]:
     """Build the cable-manipulation scene using the shared workspace."""
-    return _build_workspace(show_viewer=show_viewer, task_object="cable", camera_specs=camera_specs)
+    return _build_workspace(
+        show_viewer=show_viewer, task_object="cable",
+        camera_specs=camera_specs, condition=condition,
+    )
 
 
 def build_box_folding_scene(
     show_viewer: bool = True,
     camera_specs: dict[str, object] | None = None,
+    condition=None,
 ) -> tuple[gs.Scene, dict[str, object]]:
     """Build the box-folding scene using the shared workspace."""
-    return _build_workspace(show_viewer=show_viewer, task_object="box", camera_specs=camera_specs)
+    return _build_workspace(
+        show_viewer=show_viewer, task_object="box",
+        camera_specs=camera_specs, condition=condition,
+    )
 
 
 def build_cable_connected_scene(
     show_viewer: bool = True,
     camera_specs: dict[str, object] | None = None,
+    condition=None,
 ) -> tuple[gs.Scene, dict[str, object]]:
     """Build the experimental connected-cable scene on a preserved copy."""
-    return _build_workspace(show_viewer=show_viewer, task_object="cable_connected", camera_specs=camera_specs)
+    return _build_workspace(
+        show_viewer=show_viewer, task_object="cable_connected",
+        camera_specs=camera_specs, condition=condition,
+    )
 
 
 def _build_workspace(
     show_viewer: bool,
     task_object: str,
     camera_specs: dict[str, object] | None = None,
+    condition=None,
 ) -> tuple[gs.Scene, dict[str, object]]:
     """Build the shared workspace with exactly one task object."""
     init_genesis()
@@ -203,6 +238,15 @@ def _build_workspace(
     elif task_object == "cable_connected":
         _add_cable_connected_proxy(scene, spec, entities)
 
+    if condition is not None:
+        for index, position in enumerate(condition.distractors):
+            entities[f"distractor_{index}"] = scene.add_entity(
+                gs.morphs.Box(pos=position, size=(0.025, 0.025, 0.035), fixed=True),
+                material=gs.materials.Rigid(),
+                surface=gs.surfaces.Default(color=(0.8, 0.25, 0.15)),
+                name=f"distractor_{index}",
+            )
+
     if camera_specs is not None:
         entities["snapshot_camera"] = scene.add_camera(**camera_specs)
 
@@ -214,7 +258,8 @@ def _build_workspace(
     if task_object == "cable_connected":
         _initialize_cable_connected_proxy(spec, entities)
     debug_center = spec.box_fold_target_center if uses_hinged_box else spec.target_center
-    scene.draw_debug_frame(_make_transform(debug_center), axis_length=0.18)
+    if condition is None:
+        scene.draw_debug_frame(_make_transform(debug_center), axis_length=0.18)
     return scene, entities
 
 

@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 import sys
 import time
+import json
 
 import numpy as np
 
@@ -38,12 +39,44 @@ def main() -> int:
     )
     parser.add_argument("--max-steps", type=int, default=0)
     parser.add_argument("--drop-height", type=float, default=0.18)
+    parser.add_argument(
+        "--schedule", type=Path, help="Preview a saved evaluation condition"
+    )
+    parser.add_argument("--condition-index", type=int, default=0)
+    parser.add_argument("--backend", choices=("cpu", "gpu"), default="gpu")
     args = parser.parse_args()
+    if args.schedule is not None:
+        from firm_sim.perturbations import Condition
+        from firm_sim.evaluation.environment import GenesisEnvironment
+
+        conditions = json.loads(args.schedule.read_text())
+        if not 0 <= args.condition_index < len(conditions):
+            parser.error("condition-index is outside the schedule")
+        condition = Condition(**conditions[args.condition_index])
+        camera = {
+            "res": (320, 240),
+            "pos": (1.25, -0.9, 1.35),
+            "lookat": (0.55, 0.0, 0.72),
+            "fov": 45,
+        }
+        env = GenesisEnvironment(
+            condition, camera, backend=args.backend, show_viewer=not args.headless
+        )
+        steps = 0
+        try:
+            while args.max_steps <= 0 or steps < args.max_steps:
+                env.step(None)
+                steps += 1
+        except KeyboardInterrupt:
+            pass
+        return 0
 
     if args.scene == "common":
         builder = build_common_workspace_scene
     else:
-        builder = lambda show_viewer: build_task_scene(args.scene, show_viewer=show_viewer)
+        builder = lambda show_viewer: build_task_scene(
+            args.scene, show_viewer=show_viewer
+        )
     scene, entities = builder(show_viewer=not args.headless)
 
     offset_x, offset_y = DROP_OFFSETS.get(args.scene, (0.0, 0.0))
@@ -51,9 +84,15 @@ def main() -> int:
         "cable_manipulation": "cable_assembly",
         "tape_manipulation": "tape_proxy",
     }.get(args.scene)
-    if drop_entity_name is not None and drop_entity_name in entities and args.drop_height > 0.0:
+    if (
+        drop_entity_name is not None
+        and drop_entity_name in entities
+        and args.drop_height > 0.0
+    ):
         drop_entity = entities[drop_entity_name]
-        drop_entity.set_pos((offset_x, offset_y, args.drop_height), relative=True, zero_velocity=True)
+        drop_entity.set_pos(
+            (offset_x, offset_y, args.drop_height), relative=True, zero_velocity=True
+        )
 
     print(f"Genesis layer-{args.layer} scene '{args.scene}' is ready.")
     print(f"Loaded entities: {', '.join(sorted(entities.keys()))}")
