@@ -1,0 +1,19 @@
+{
+  "method": "hold_position",
+  "policy": "firm_sim.evaluation.adapters:HoldPosition",
+  "policy_options": {},
+  "judge": "firm_sim.evaluation.adapters:GeometricJudge",
+  "judge_options": {
+    "lower_m": [-0.04, -0.03, -0.005],
+    "upper_m": [0.04, 0.03, 0.06],
+    "hold_steps": 50
+  },
+  "camera": {
+    "res": [320, 240],
+    "pos": [1.25, -0.9, 1.35],
+    "lookat": [0.55, 0.0, 0.72],
+    "fov": 45
+  },
+  "backend": "cpu",
+  "max_steps": 500
+}
